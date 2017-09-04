@@ -71,15 +71,16 @@ p {
 .codrops-header {
 	padding: 4em 0 4em;
 	letter-spacing: -1px;
+    font-family: 'Raleway';
 }
 
 .codrops-header h1 {
-    background: url('chrome-extension://__MSG_@@extension_id__/icon.png') no-repeat 0 0;
+    /*background: url('chrome-extension://__MSG_@@extension_id__/icon.png') no-repeat 0 0;*/
     /*background-image:url('chrome-extension://__MSG_@@extension_id__/icon_128_2.png');*/
-    background-size: 100px;
+    /*background-size: 100px;*/
+    /*padding-left: 113px;*/
 	max-width: 1200px;
 	margin: 0 auto;
-    padding-left: 113px;
 	font-weight: 600;
 	font-size: 4em;
 	line-height: 1;
