@@ -1,0 +1,57 @@
+.tabTitle span {
+    font-size: 2.5em;
+}
+.recommend {
+    width: 900px;
+    height: 100%;
+    overflow: hidden;
+    margin: 20px auto 0;
+    /*margin-right: auto;*/
+    /*margin-left: auto;*/
+    /*margin-top: 20px;*/
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.img {
+    float: left;
+    padding-right: 5px;
+    width: 100px;
+    height: 150px;
+}
+img {
+    height: 100%;
+    width: 100%;
+}
+.itemList {
+    margin-top: 30px;
+}
+.item {
+    border-bottom: 1px solid rgba(40,44,42,0.05);
+    height: 100%;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.item h3 {
+    word-break: break-all;
+    font-weight: 400;
+    font-size: 1.2em;
+    height: auto;
+    margin: 0 0;
+    padding: 0 0;
+    display: inline-block;
+}
+.fa {
+    font-size: 2em;
+    margin: 30px 20px;
+    vertical-align: middle;
+}
+.size {
+    display: inline-block;
+}
+.left {
+    float: left;
+}
+.clearfix {
+    clear: both;
+}
