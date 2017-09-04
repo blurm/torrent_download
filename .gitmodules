@@ -1,0 +1,3 @@
+[submodule "chrome-rating"]
+	path = chrome-rating
+	url = git@github.com:blurm/chrome-rating.git
