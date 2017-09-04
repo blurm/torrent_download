@@ -41,6 +41,46 @@ function recommendResolve(dataSet) {
     }
 }
 
+function attachRatingEvent() {
+    function createOptions($target) {
+        const nameStr = $.trim($target.find('a').text()) ||
+            $.trim($target.find('a').attr('alt'));
+
+        const nameYear = TitleParser.parse(nameStr)
+        const options = {
+            name: nameYear.name,
+            year: nameYear.year,
+            type: "movie"
+        };
+        return options;
+    }
+    listHandle(createOptions, '.rarbag h3, .img');
+
+}
+function attachRatingEvent4Dytt() {
+    function createOptions($target) {
+        const nameStr = $.trim($target.find('a').text());
+
+        const nameReg = /《([^》]+)》/;
+        const yearReg = /^\d{4}/;
+        const options = {
+            name: nameStr.match(nameReg)[1],
+            year: nameStr.match(yearReg)[0],
+            type: "movie"
+        };
+        return options;
+    }
+    listHandle(createOptions, '.dytt h3');
+}
+function listHandle(createOptions, tag) {
+    const modules = [new DoubanInfo(), new IMDBInfo()];
+    const common = new Common(modules, createOptions, 'movie');
+
+    common.listHandle(
+        /.*/i,
+        tag
+    );
+}
 function reject(reason) {
     console.log(reason);
 }
@@ -85,7 +125,6 @@ function getTop100(success, error) {
 
 function dyttResolve(data) {
     const aArr = $(data).find('.co_content8 b a')
-    console.log(aArr);
     const dyttURL = 'http://www.dytt8.net';
     for (const a of aArr) {
         const href = $(a).attr('href');
@@ -111,6 +150,7 @@ function dyttResolve(data) {
 
         $('.dytt').append($(itemHTML));
     }
+
 }
 
 function getDytt(success, error) {
@@ -120,21 +160,27 @@ function getDytt(success, error) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    // tab section related
     (function() {
         [].slice.call( document.querySelectorAll( '.tabs' ) ).forEach( function( el ) {
             new CBPFWTabs( el );
         });
     })();
+    // 电影天堂
+    new Promise((success, error) => getDytt(
+        success, error))
+        .then(dyttResolve)
+        .then(attachRatingEvent4Dytt)
+        .catch(reject);
+    // rarbg今日推荐
     new Promise((success, error) => getRecommend(
         success, error))
         .then(recommendResolve)
         .catch(reject);
+    // rarbg最受欢迎top100
     new Promise((success, error) => getTop100(
         success, error))
         .then(top100Resolve)
-        .catch(reject);
-    new Promise((success, error) => getDytt(
-        success, error))
-        .then(dyttResolve)
+        .then(attachRatingEvent())
         .catch(reject);
 });
