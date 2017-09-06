@@ -1,4 +1,7 @@
+"use strict";
+
 const rarbgURL = 'https://rarbg.is/download.php?'
+const dyttURL = 'http://www.dytt8.net';
 
 function getSyncHTML(url) {
     return $.ajax({
@@ -18,8 +21,13 @@ function getRecommend(success, error) {
 }
 
 function recommendResolve(dataSet) {
-    $('.recommend').empty();
-    const $td = $(dataSet).find('td .lista').has('a[href^="/torrent/"] img');
+    //console.log(dataSet.match(/<img.*(?!over_opt)(?:>|\/>)/gi));
+    //http((?!regexr).)*$
+    const newData = dataSet.replace(/<img((?!over_opt).)*(?:>|\/>)/gi,'');
+    //const newData = dataSet.replace(/<img.*(?:>|\/>)/gi,'');
+    const jqData = $(newData);
+
+    const $td = jqData.find('td .lista').has('a[href^="/torrent/"] img');
 
     for (const td of $td) {
         const a = $(td).find('a').eq(0);
@@ -46,8 +54,10 @@ function reject(reason) {
 }
 
 function top100Resolve(dataSet) {
-    $('.top100').empty();
-    const trArr = $(dataSet).find('tr.lista2');
+    const newData = dataSet.replace(/<img.*?(?:>|\/>)/gi,'');
+    const jqData = $(newData);
+
+    const trArr = jqData.find('tr.lista2');
     for (const tr of trArr) {
         const tdArr = $(tr).find('td');
 
@@ -82,21 +92,23 @@ function getTop100(success, error) {
     const url = 'https://rarbg.is/top100.php?category[]=14&category[]=15&category[]=16&category[]=17&category[]=21&category[]=22&category[]=42&category[]=44&category[]=45&category[]=46&category[]=47&category[]=48';
     getAsyncHTML(url, success, error);
 }
+function getDyttItem(url) {
+    return new Promise(function(resolve, reject) {
+        getAsyncHTML(url, resolve, reject);
+    });
+}
+function dyttItemResolve(data) {
+    // Remove all images
+    const newData = data.replace(/<img.*?(?:>|\/>)/gi,'');
+    const jqData = $(newData);
 
-function dyttResolve(data) {
-    const aArr = $(data).find('.co_content8 b a')
-    const dyttURL = 'http://www.dytt8.net';
-    for (const a of aArr) {
-        const href = $(a).attr('href');
-        const itemURL = dyttURL + href;
-        const $itemHTML = $(getSyncHTML(itemURL));
-        const tempA = $itemHTML.find('a[href^="ftp"]');
+    const title = jqData.find('.bd3r .co_area2 .title_all').text();
 
-        const title = $(a).text();
-        const downloadURL = tempA.attr('href');
+    const tempA = jqData.find('a[href^="ftp"]');
+    const downloadURL = tempA.attr('href');
 
 
-        let itemHTML = `<div class="item">
+    let itemHTML = `<div class="item">
                             <div class="title">
                                 <h3>
                                     <a href="${downloadURL}" alt="${title}">
@@ -108,13 +120,62 @@ function dyttResolve(data) {
                             <div class="detail"></div>
                         </div>`;
 
-        $('.dytt').append($(itemHTML));
+    $('.dytt').append($(itemHTML));
+}
+function dyttResolve(data) {
+    const newData = data.replace('<img', '<noimg');
+    const areaArr = $(newData).find('.co_area2');
+    for (const area of areaArr) {
+        const title = $(area).find('.title_all').text();
+        if (title === '最新发布170部影视') {
+            const aArr = $(area).find('a');
+            // 第一个元素是‘IMDB评分8分以上影片200部' 去掉
+            aArr.splice(0, 1);
+
+            for (const a of aArr) {
+                setTimeout(function () {
+                    const url = dyttURL + a.pathname;
+                    getDyttItem(url)
+                        .then(dyttItemResolve)
+                    //.then(attachRatingEvent4Dytt)
+                        .catch(reject);
+
+                }, 500);
+            }
+        }
     }
+
+    //const aArr = $(data).find('.co_content8 b a')
+    //for (const a of aArr) {
+        //const href = $(a).attr('href');
+        //const itemURL = dyttURL + href;
+        //const $itemHTML = $(getSyncHTML(itemURL));
+        //const tempA = $itemHTML.find('a[href^="ftp"]');
+
+        //const title = $(a).text();
+        //const downloadURL = tempA.attr('href');
+
+
+        //let itemHTML = `<div class="item">
+                            //<div class="title">
+                                //<h3>
+                                    //<a href="${downloadURL}" alt="${title}">
+                                        //${title}
+                                    //</a>
+                                //</h3>
+                                //<span class="size"></span>
+                            //</div>
+                            //<div class="detail"></div>
+                        //</div>`;
+
+        //$('.dytt').append($(itemHTML));
+    //}
 
 }
 
 function getDytt(success, error) {
-    const url = "http://www.dytt8.net/html/gndy/dyzz/index.html";
+    //const url = "http://www.dytt8.net/html/gndy/dyzz/index.html";
+    const url = "http://www.dytt8.net/";
     getAsyncHTML(url, success, error);
 }
 

@@ -142,6 +142,7 @@
 /* Content */
 .content-wrap {
 	position: relative;
+    margin-bottom: 500px;
 }
 
 .content-wrap section {
