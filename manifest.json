@@ -1,7 +1,7 @@
 {
-  "name" : "Torrent Download",
+  "name" : "Movie Torrent Download 最新电影下载",
   "version" : "1.0",
-  "description" : "Torrent file listing from rarbg",
+  "description" : "Easy download movie from rarbg and dytt8",
   "icons": {
       "16": "icon.png",
       "48": "icon.png",

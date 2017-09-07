@@ -1,19 +1,11 @@
 "use strict";
 
-const rarbgURL = 'https://rarbg.is/download.php?'
+const rarbgURL = 'https://rarbg.is/download.php?';
 const dyttURL = 'http://www.dytt8.net';
-
-function getSyncHTML(url) {
-    return $.ajax({
-        url: url,
-        async: false
-    }).responseText;
-}
 
 function getAsyncHTML(url, resolve, reject) {
     $.ajax(url).done(resolve).fail(reject);
 }
-
 
 function getRecommend(success, error) {
     const url = "https://rarbg.is/torrents.php?category=movies";
@@ -21,10 +13,7 @@ function getRecommend(success, error) {
 }
 
 function recommendResolve(dataSet) {
-    //console.log(dataSet.match(/<img.*(?!over_opt)(?:>|\/>)/gi));
-    //http((?!regexr).)*$
     const newData = dataSet.replace(/<img((?!over_opt).)*(?:>|\/>)/gi,'');
-    //const newData = dataSet.replace(/<img.*(?:>|\/>)/gi,'');
     const jqData = $(newData);
 
     const $td = jqData.find('td .lista').has('a[href^="/torrent/"] img');
@@ -37,10 +26,10 @@ function recommendResolve(dataSet) {
         const id = $(a).attr('href').match(/\/torrent\/(.*)/)[1];
         const title = $(a).attr('title');
 
-        let downloadURL = rarbgURL + 'id=' + id + '&f=' + title + '-[rarbg.to].torrent'
+        const downloadURL = rarbgURL + 'id=' + id + '&f=' + title + '-[rarbg.to].torrent';
 
-        let itemHTML = `<div class="img">
-                            <a href="${downloadURL}" alt="${title}">
+        const itemHTML = `<div class="img" >
+                            <a href="${downloadURL}" alt="${title}" data-balloon="${title}" data-balloon-pos="up">
                                 <img src="${img.attr('src')}" border="0" alt="${title}">
                             </a>
                         </div>`;
@@ -63,14 +52,13 @@ function top100Resolve(dataSet) {
 
         const $a = $(tdArr[1]).find('a').eq(0);
         const title = $a.attr('title');
-        const href = $a.attr('href');
         const detail = $(tdArr[1]).find('span').eq(1).text();
         const size = $(tdArr[3]).text();
 
         const id = $a.attr('href').match(/\/torrent\/(.*)/)[1];
-        let downloadURL = rarbgURL + 'id=' + id + '&f=' + title + '-[rarbg.to].torrent'
+        const downloadURL = rarbgURL + 'id=' + id + '&f=' + title + '-[rarbg.to].torrent';
 
-        let itemHTML = `<div class="item">
+        const itemHTML = `<div class="item">
                             <div class="title">
                                 <h3>
                                     <a href="${downloadURL}" alt="${title}">
@@ -105,10 +93,10 @@ function dyttItemResolve(data) {
     const title = jqData.find('.bd3r .co_area2 .title_all').text();
 
     const tempA = jqData.find('a[href^="ftp"]');
-    const downloadURL = tempA.attr('href');
+    // 转换成迅雷url格式
+    const downloadURL = ThunderEncode(tempA.attr('href'));
 
-
-    let itemHTML = `<div class="item">
+    const itemHTML = `<div class="item">
                             <div class="title">
                                 <h3>
                                     <a href="${downloadURL}" alt="${title}">
@@ -137,7 +125,6 @@ function dyttResolve(data) {
                     const url = dyttURL + a.pathname;
                     getDyttItem(url)
                         .then(dyttItemResolve)
-                    //.then(attachRatingEvent4Dytt)
                         .catch(reject);
 
                 }, 500);
@@ -183,8 +170,8 @@ function getDytt(success, error) {
 document.addEventListener('DOMContentLoaded', function() {
     // tab section related
     (function() {
-        [].slice.call( document.querySelectorAll( '.tabs' ) ).forEach( function( el ) {
-            new CBPFWTabs( el );
+        [].slice.call(document.querySelectorAll('.tabs')).forEach(function(el) {
+            new CBPFWTabs(el);
         });
     })();
     // append img logo div
