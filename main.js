@@ -2,17 +2,59 @@
 
 const rarbgURL = 'https://rarbg.is/download.php?';
 const dyttURL = 'http://www.dytt8.net';
+const rarbgHosts = [
+    {host: 'https://rarbgmirror.com', response: 9999},
+    {host: 'https://rarbg.is', response: 9999},
+    {host: 'https://rarbg.to', response: 9999}
+    //{host: 'https://rarbgunblock.com', response: 9999},
+    //{host: 'http://rarbgs.com', response: 9999},
+    //{host: 'http://rarbg4-to.unblocked.lol', response: 9999},
+    //{host: 'https://rarbg.unblocked.bet', response: 9999},
+    //{host: 'http://rarbg-to.pbproxy.red', response: 9999},
+    //{host: 'https://rarbg.unblocked.cool', response: 9999},
+    //{host: 'https://rarbg.unblockall.org', response: 9999}
+];
+var rarbgResponsed = false;
+var currentRarbgHost = null;
+
+function getValidRarbgHost(success) {
+    console.log(rarbgHosts);
+    for (const item of rarbgHosts) {
+        //const url = item.host + '/index8.php';
+        const url = item.host;
+        const start_time = new Date().getTime();
+        getAsyncHTML(url,
+        (data) => {
+            if (rarbgResponsed) {
+                return;
+            }
+            const request_time = new Date().getTime() - start_time;
+            item.response = request_time;
+            // sort with response time, next time with start with lower response
+            rarbgHosts.sort((a, b) => a.response - b.response);
+            console.log(item.host, 'responsed', request_time);
+            rarbgResponsed = true;
+            currentRarbgHost = item.host;
+            success();
+        },
+        (error) => {
+            console.log(item.host, error);
+        })
+    }
+}
 
 function getAsyncHTML(url, resolve, reject) {
     $.ajax(url).done(resolve).fail(reject);
 }
 
 function getRecommend(success, error) {
-    const url = "https://rarbg.is/torrents.php?category=movies";
+    const url = currentRarbgHost + "/torrents.php?category=movies";
+    console.log(url);
     getAsyncHTML(url, success, error);
 }
 
 function recommendResolve(dataSet) {
+    console.log('recommendResolve');
     const newData = dataSet.replace(/<img((?!over_opt).)*(?:>|\/>)/gi,'');
     const jqData = $(newData);
 
@@ -38,11 +80,14 @@ function recommendResolve(dataSet) {
     }
 }
 
-function reject(reason) {
-    console.log(reason);
+function getTop100(success, error) {
+    const url = currentRarbgHost + "/top100.php?category[]=14&category[]=15&category[]=16&category[]=17&category[]=21&category[]=22&category[]=42&category[]=44&category[]=45&category[]=46&category[]=47&category[]=48";
+    console.log(url);
+    getAsyncHTML(url, success, error);
 }
 
 function top100Resolve(dataSet) {
+    console.log('top100Resolve');
     const newData = dataSet.replace(/<img.*?(?:>|\/>)/gi,'');
     const jqData = $(newData);
 
@@ -76,10 +121,6 @@ function top100Resolve(dataSet) {
     }
 }
 
-function getTop100(success, error) {
-    const url = 'https://rarbg.is/top100.php?category[]=14&category[]=15&category[]=16&category[]=17&category[]=21&category[]=22&category[]=42&category[]=44&category[]=45&category[]=46&category[]=47&category[]=48';
-    getAsyncHTML(url, success, error);
-}
 function getDyttItem(url) {
     return new Promise(function(resolve, reject) {
         getAsyncHTML(url, resolve, reject);
@@ -131,41 +172,16 @@ function dyttResolve(data) {
             }
         }
     }
-
-    //const aArr = $(data).find('.co_content8 b a')
-    //for (const a of aArr) {
-        //const href = $(a).attr('href');
-        //const itemURL = dyttURL + href;
-        //const $itemHTML = $(getSyncHTML(itemURL));
-        //const tempA = $itemHTML.find('a[href^="ftp"]');
-
-        //const title = $(a).text();
-        //const downloadURL = tempA.attr('href');
-
-
-        //let itemHTML = `<div class="item">
-                            //<div class="title">
-                                //<h3>
-                                    //<a href="${downloadURL}" alt="${title}">
-                                        //${title}
-                                    //</a>
-                                //</h3>
-                                //<span class="size"></span>
-                            //</div>
-                            //<div class="detail"></div>
-                        //</div>`;
-
-        //$('.dytt').append($(itemHTML));
-    //}
-
 }
 
 function getDytt(success, error) {
-    //const url = "http://www.dytt8.net/html/gndy/dyzz/index.html";
     const url = "http://www.dytt8.net/";
     getAsyncHTML(url, success, error);
 }
 
+function reject(reason) {
+    console.log(reason);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // tab section related
@@ -184,15 +200,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(dyttResolve)
         .then(attachRatingEvent4Dytt)
         .catch(reject);
-    // rarbg今日推荐
-    new Promise((success, error) => getRecommend(
-        success, error))
-        .then(recommendResolve)
-        .catch(reject);
-    // rarbg最受欢迎top100
-    new Promise((success, error) => getTop100(
-        success, error))
-        .then(top100Resolve)
-        .then(attachRatingEvent())
-        .catch(reject);
+    getValidRarbgHost(() => {
+        // rarbg今日推荐
+        new Promise((success, error) => getRecommend(
+            success, error))
+            .then(recommendResolve)
+            .catch(reject);
+        // rarbg最受欢迎top100
+        new Promise((success, error) => getTop100(
+            success, error))
+            .then(top100Resolve)
+            .then(attachRatingEvent)
+            .catch(reject);
+    })
 });
