@@ -1,6 +1,6 @@
 {
   "name" : "Movie Torrent Download 最新电影下载",
-  "version" : "1.0",
+  "version" : "1.0.1",
   "description" : "Easy download movie from rarbg and dytt8",
   "icons": {
       "16": "icon.png",

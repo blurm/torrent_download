@@ -5,14 +5,14 @@ const dyttURL = 'http://www.dytt8.net';
 const rarbgHosts = [
     {host: 'https://rarbgmirror.com', response: 9999},
     {host: 'https://rarbg.is', response: 9999},
-    {host: 'https://rarbg.to', response: 9999}
-    //{host: 'https://rarbgunblock.com', response: 9999},
-    //{host: 'http://rarbgs.com', response: 9999},
-    //{host: 'http://rarbg4-to.unblocked.lol', response: 9999},
-    //{host: 'https://rarbg.unblocked.bet', response: 9999},
-    //{host: 'http://rarbg-to.pbproxy.red', response: 9999},
-    //{host: 'https://rarbg.unblocked.cool', response: 9999},
-    //{host: 'https://rarbg.unblockall.org', response: 9999}
+    {host: 'https://rarbg.to', response: 9999},
+    {host: 'https://rarbgunblock.com', response: 9999},
+    {host: 'http://rarbgs.com', response: 9999},
+    {host: 'http://rarbg4-to.unblocked.lol', response: 9999},
+    {host: 'https://rarbg.unblocked.bet', response: 9999},
+    {host: 'http://rarbg-to.pbproxy.red', response: 9999},
+    {host: 'https://rarbg.unblocked.cool', response: 9999},
+    {host: 'https://rarbg.unblockall.org', response: 9999}
 ];
 var rarbgResponsed = false;
 var currentRarbgHost = null;
@@ -54,7 +54,26 @@ function getRecommend(success, error) {
 }
 
 function recommendResolve(dataSet) {
-    console.log('recommendResolve');
+    if (dataSet.indexOf('Please wait while we try to verify your browser') > 0) {
+        console.log(currentRarbgHost, 'need verify');
+        for (let i = 0, len = rarbgHosts.length; i < len; i++) {
+            if (currentRarbgHost === rarbgHosts[i].host) {
+                rarbgHosts.splice(i, 1);
+                currentRarbgHost = null;
+                rarbgResponsed = false;
+                break;
+            }
+        }
+        getValidRarbgHost(() => {
+            // rarbg今日推荐
+            new Promise((success, error) => getRecommend(
+                success, error))
+                .then(recommendResolve)
+                .catch(reject);
+        })
+        return;
+    }
+    console.log('recommendResolve', currentRarbgHost);
     const newData = dataSet.replace(/<img((?!over_opt).)*(?:>|\/>)/gi,'');
     const jqData = $(newData);
 
@@ -175,7 +194,7 @@ function dyttResolve(data) {
 }
 
 function getDytt(success, error) {
-    const url = "http://www.dytt8.net/";
+    const url = "http://www.dytt8.net/index.htm";
     getAsyncHTML(url, success, error);
 }
 
